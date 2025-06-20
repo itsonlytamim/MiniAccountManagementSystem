@@ -1,0 +1,58 @@
+@page "{id:int}"
+@model Web.Pages.Vouchers.DetailsModel
+@{
+    ViewData["Title"] = "Voucher Details";
+}
+
+<h1>Voucher Details</h1>
+<hr />
+<div class="mb-3">
+    <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+</div>
+<div class="card mb-4">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Voucher ID</dt>
+            <dd class="col-sm-9">@Model.Voucher.VoucherId</dd>
+            <dt class="col-sm-3">Date</dt>
+            <dd class="col-sm-9">@Model.Voucher.VoucherDate.ToShortDateString()</dd>
+            <dt class="col-sm-3">Type</dt>
+            <dd class="col-sm-9">@Model.Voucher.VoucherType</dd>
+            <dt class="col-sm-3">Reference No</dt>
+            <dd class="col-sm-9">@Model.Voucher.ReferenceNo</dd>
+            <dt class="col-sm-3">Narration</dt>
+            <dd class="col-sm-9">@Model.Voucher.Narration</dd>
+            <dt class="col-sm-3">Created By</dt>
+            <dd class="col-sm-9">@Model.Voucher.CreatedByUserId</dd>
+        </dl>
+    </div>
+</div>
+<h4>Voucher Lines</h4>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Account Code</th>
+            <th>Account Name</th>
+            <th>Debit</th>
+            <th>Credit</th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (Model.Voucher.Details != null && Model.Voucher.Details.Any())
+    {
+        foreach (var d in Model.Voucher.Details)
+        {
+            <tr>
+                <td>@d.Account?.AccountCode</td>
+                <td>@d.Account?.AccountName</td>
+                <td>@d.DebitAmount</td>
+                <td>@d.CreditAmount</td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr><td colspan="4" class="text-center">No details found.</td></tr>
+    }
+    </tbody>
+</table> 
