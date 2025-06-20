@@ -13,7 +13,7 @@ namespace Core.Entities
         public VoucherType VoucherType { get; set; }
         public string? ReferenceNo { get; set; }
         public string? Narration { get; set; }
-        public string CreatedByUserId { get; set; }
+        public string? CreatedByUserId { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<VoucherDetail> Details { get; set; } = new List<VoucherDetail>();
     }

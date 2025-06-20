@@ -1,0 +1,95 @@
+﻿@page
+@model Web.Pages.Vouchers.CreateModel
+
+@{
+    ViewData["Title"] = "Create Voucher";
+}
+
+<h1>Create Voucher</h1>
+<hr />
+
+<form method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <h4>Voucher Header</h4>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label asp-for="Voucher.VoucherDate" class="form-label"></label>
+            <input asp-for="Voucher.VoucherDate" class="form-control" type="date" />
+            <span asp-validation-for="Voucher.VoucherDate" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Voucher.VoucherType" class="form-label"></label>
+            <select asp-for="Voucher.VoucherType" asp-items="Html.GetEnumSelectList<Core.Entities.VoucherType>()" class="form-select"></select>
+            <span asp-validation-for="Voucher.VoucherType" class="text-danger"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Voucher.ReferenceNo" class="form-label"></label>
+            <input asp-for="Voucher.ReferenceNo" class="form-control" />
+        </div>
+        <div class="col-md-12">
+            <label asp-for="Voucher.Narration" class="form-label"></label>
+            <textarea asp-for="Voucher.Narration" class="form-control" rows="2"></textarea>
+        </div>
+    </div>
+
+    <hr />
+
+    <h4>Voucher Details</h4>
+    <div class="row fw-bold mb-2 d-none d-md-flex">
+        <div class="col-md-5">Account</div>
+        <div class="col-md-3">Debit</div>
+        <div class="col-md-3">Credit</div>
+        <div class="col-md-1"></div>
+    </div>
+
+    <div id="voucher-details-container">
+        @for (var i = 0; i < Model.Voucher.Details.Count; i++)
+        {
+            <div class="row voucher-detail-row mb-2">
+                <div class="col-md-5">
+                    <select asp-for="Voucher.Details[i].AccountId" asp-items="Model.AccountSL" class="form-select account-dropdown">
+                        <option value="">-- Select Account --</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input asp-for="Voucher.Details[i].DebitAmount" class="form-control debit-input" type="number" step="0.01" />
+                </div>
+                <div class="col-md-3">
+                    <input asp-for="Voucher.Details[i].CreditAmount" class="form-control credit-input" type="number" step="0.01" />
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-danger btn-sm remove-detail-line">×</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-md-5">
+            <button type="button" id="add-detail-line" class="btn btn-success">Add Line</button>
+        </div>
+        <div class="col-md-3 fw-bold border-top pt-2" id="total-debit">0.00</div>
+        <div class="col-md-3 fw-bold border-top pt-2" id="total-credit">0.00</div>
+    </div>
+    <div class="row">
+        <div class="col-md-8 text-end fw-bold">Balance:</div>
+        <div class="col-md-3 fw-bold" id="balance-container">
+            <span id="balance">0.00</span>
+        </div>
+    </div>
+
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary">Save Voucher</button>
+        <a asp-page="/Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Pass the account options to the JS file
+        const accountOptions = `@Html.Raw(string.Join("", Model.AccountSL.Select(s => $"<option value=\\'{s.Value}\\'>{s.Text.Replace("'", "\\'")}</option>")))`;
+    </script>
+    <script src="~/js/voucher-entry.js" asp-append-version="true"></script>
+}
