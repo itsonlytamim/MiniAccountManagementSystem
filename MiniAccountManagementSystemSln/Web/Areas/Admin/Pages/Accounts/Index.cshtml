@@ -1,0 +1,20 @@
+@page
+@model MiniAccountManagementSystemSln.Web.Areas.Admin.Pages.Accounts.IndexModel
+@{
+    ViewData["Title"] = "Chart of Accounts";
+}
+<h2>Chart of Accounts</h2>
+<a asp-page="Create" class="btn btn-primary mb-3">Add Root Account</a>
+@if (Model.Accounts.Any())
+{
+    <ul class="list-group">
+        @foreach (var acc in Model.Accounts)
+        {
+            @Html.Partial("_AccountNode", acc)
+        }
+    </ul>
+}
+else
+{
+    <p>No accounts found.</p>
+}

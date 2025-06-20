@@ -1,0 +1,31 @@
+@page
+@model MiniAccountManagementSystemSln.Web.Areas.Admin.Pages.Roles.IndexModel
+@{
+    ViewData["Title"] = "Roles Management";
+}
+
+<h2>Roles Management</h2>
+
+<div class="mb-3">
+    <a asp-page="Create" class="btn btn-primary">Create New Role</a>
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Role Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var role in Model.Roles)
+        {
+            <tr>
+                <td>@role.Name</td>
+                <td>
+                    <a asp-page="Delete" asp-route-id="@role.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
