@@ -6,14 +6,15 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Data;
 
+
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Add DbContext with SQL Server
+// Adding DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Add Identity
+// Adding Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -21,7 +22,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
 // Register Dapper context
 builder.Services.AddSingleton<DapperContext>();
 
-// Register repositories
+// Registering repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 builder.Services.AddRazorPages(options =>
@@ -30,16 +31,15 @@ builder.Services.AddRazorPages(options =>
 });
 
 
-// Add services to the container.
-//builder.Services.AddRazorPages();
-
+builder.Services.AddRazorPages();
+builder.Services.AddSingleton<DbContext>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
