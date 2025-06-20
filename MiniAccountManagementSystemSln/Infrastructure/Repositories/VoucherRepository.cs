@@ -13,9 +13,9 @@ namespace Infrastructure.Repositories
 {
     public class VoucherRepository : IVoucherRepository
     {
-        private readonly DbContext _context;
+        private readonly DapperContext _context;
 
-        public VoucherRepository(DbContext context)
+        public VoucherRepository(DapperContext context)
         {
             _context = context;
         }
