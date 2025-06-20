@@ -13,9 +13,9 @@ namespace Infrastructure.Repositories
 {
     public class AccountRepository : IAccountRepository
     {
-        private readonly DbContext _context;
+        private readonly DapperContext _context;
 
-        public AccountRepository(DbContext context)
+        public AccountRepository(DapperContext context)
         {
             _context = context;
         }
