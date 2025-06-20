@@ -3,16 +3,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Web</title>
+    <title>@ViewData["Title"] - Mini Account System</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Web.styles.css" asp-append-version="true" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Web</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Mini Account System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -22,24 +21,20 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                        @if (User.IsInRole("Admin") || User.IsInRole("Accountant"))
+                        @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Admin
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                    @if (User.IsInRole("Admin"))
-                                    {
-                                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Users/Index">Users</a></li>
-                                        <li><a class="dropdown-item" asp-area="Admin" asp-page="/Roles/Index">Roles</a></li>
-                                    }
-                                    <li><a class="dropdown-item" asp-area="Admin" asp-page="/Accounts/Index">Chart of Accounts</a></li>
-                                </ul>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/ChartOfAccounts/Index">Chart of Accounts</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Vouchers/Create">Create Voucher</a>
+                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-primary" asp-area="" asp-page="/Admin/Users">User Management</a>
+                                </li>
+                            }
                         }
                     </ul>
                     <partial name="_LoginPartial" />
@@ -55,7 +50,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - Web - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            � 2024 - Mini Account System
         </div>
     </footer>
 
