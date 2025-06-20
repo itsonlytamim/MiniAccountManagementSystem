@@ -14,5 +14,6 @@ namespace Core.Interfaces
         Task UpdateAsync(Account account);
         Task DeleteAsync(int accountId);
         Task<Account?> GetByIdAsync(int accountId);
+        Task<bool> HasChildrenAsync(int accountId);
     }
 }

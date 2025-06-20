@@ -107,5 +107,16 @@ namespace Infrastructure.Repositories
                     commandType: CommandType.StoredProcedure);
             }
         }
+
+        public async Task<bool> HasChildrenAsync(int accountId)
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                var count = await connection.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(1) FROM ChartOfAccounts WHERE ParentAccountId = @AccountId",
+                    new { AccountId = accountId });
+                return count > 0;
+            }
+        }
     }
 }

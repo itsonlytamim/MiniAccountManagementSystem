@@ -1,0 +1,42 @@
+@page "{id:int}"
+@model Web.Pages.ChartOfAccounts.DeleteModel
+
+@{
+    ViewData["Title"] = "Delete Account";
+}
+
+<h1>Delete Account</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+        <form method="post">
+            <input type="hidden" asp-for="Account.AccountId" />
+            <div class="mb-3">
+                <label class="form-label">Account Code</label>
+                <input class="form-control" value="@Model.Account.AccountCode" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Account Name</label>
+                <input class="form-control" value="@Model.Account.AccountName" readonly />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Parent Account ID</label>
+                <input class="form-control" value="@Model.Account.ParentAccountId" readonly />
+            </div>
+            @if (Model.HasChildren)
+            {
+                <div class="alert alert-warning">This account has child accounts and cannot be deleted.</div>
+                <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+            }
+            else
+            {
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+            }
+        </form>
+    </div>
+</div> 
