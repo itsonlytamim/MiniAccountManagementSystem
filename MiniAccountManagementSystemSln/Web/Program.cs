@@ -8,7 +8,7 @@ using Web.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Adding services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -16,7 +16,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Add Identity
+// Adding Identity
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -29,10 +29,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddRoles<ApplicationRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Register Dapper context
+// Registering Dapper context
 builder.Services.AddScoped<DapperContext>();
 
-// Register repositories
+// Registering repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
@@ -52,7 +52,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireViewerRole", policy => policy.RequireRole("Viewer"));
 });
 
-// Add Razor Pages with authorization
+// Adding Razor Pages with authorization
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/Admin");
@@ -61,7 +61,7 @@ builder.Services.AddRazorPages(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuring the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -81,7 +81,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 
-// Seed the database with initial admin user and roles
+// Seeding the database with initial admin user and roles
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -93,7 +93,7 @@ using (var scope = app.Services.CreateScope())
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<ApplicationRole>>();
         
-        // Apply pending migrations
+        // Applying pending migrations
         await context.Database.MigrateAsync();
         
         // Seed roles
@@ -107,7 +107,7 @@ using (var scope = app.Services.CreateScope())
             }
         }
         
-        // Create admin user if it doesn't exist
+        // Creating admin user if it doesn't exist
         var adminEmail = "admin@example.com";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
         
