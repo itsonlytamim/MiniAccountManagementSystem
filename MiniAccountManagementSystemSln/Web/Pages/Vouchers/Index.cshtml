@@ -1,0 +1,42 @@
+@page
+@model Web.Pages.Vouchers.IndexModel
+@{
+    ViewData["Title"] = "Vouchers";
+}
+
+<h1>Vouchers</h1>
+<hr />
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Voucher ID</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Reference No</th>
+            <th>Narration</th>
+            <th>Created By</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (Model.Vouchers != null && Model.Vouchers.Any())
+    {
+        foreach (var v in Model.Vouchers)
+        {
+            <tr>
+                <td>@v.VoucherId</td>
+                <td>@v.VoucherDate.ToShortDateString()</td>
+                <td>@v.VoucherType</td>
+                <td>@v.ReferenceNo</td>
+                <td>@v.Narration</td>
+                <td>@v.CreatedByUserId</td>
+                <td><a asp-page="Details" asp-route-id="@v.VoucherId" class="btn btn-sm btn-info">View</a></td>
+            </tr>
+        }
+    }
+    else
+    {
+        <tr><td colspan="6" class="text-center">No vouchers found.</td></tr>
+    }
+    </tbody>
+</table> 
