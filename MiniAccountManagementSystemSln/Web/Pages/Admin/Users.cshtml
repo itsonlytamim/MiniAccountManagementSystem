@@ -1,0 +1,41 @@
+﻿@page
+@model Web.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<h1>User Management</h1>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>User Name</th>
+            <th>Current Role</th>
+            <th>Change Role To</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model.Users)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td><span class="badge bg-primary">@user.Role</span></td>
+                <td>
+                    <form method="post">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <div class="input-group">
+                            <select name="newRole" class="form-select" asp-items="Model.RolesSL"></select>
+                            <button type="submit" class="btn btn-sm btn-success">Update</button>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
