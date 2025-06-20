@@ -1,8 +1,14 @@
+using Core.Interfaces;
+using Infrastructure.Data;
+using Infrastructure.Repositories;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-
+builder.Services.AddSingleton<DbContext>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
