@@ -12,8 +12,8 @@ namespace Core.Entities
         public string AccountCode { get; set; }
         public string AccountName { get; set; }
         public int? ParentAccountId { get; set; }
-        public Account ParentAccount { get; set; }
-        public int Level { get; set; }
+        public Account? ParentAccount { get; set; }
+        public int? Level { get; set; }
         public ICollection<Account> Children { get; set; } = new List<Account>();
     }
 }
