@@ -57,14 +57,65 @@ namespace Infrastructure.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Task<IEnumerable<Voucher>> GetAllAsync(int pageNumber, int pageSize)
+        public async Task<IEnumerable<Voucher>> GetAllAsync(int pageNumber, int pageSize)
         {
-            throw new System.NotImplementedException();
+            using (var connection = _context.CreateConnection())
+            {
+                var sql = @"SELECT VoucherId, VoucherDate, VoucherType, ReferenceNo, Narration, CreatedByUserId
+                            FROM Vouchers
+                            ORDER BY VoucherDate DESC, VoucherId DESC
+                            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+                return await connection.QueryAsync<Voucher>(sql, new
+                {
+                    Offset = (pageNumber - 1) * pageSize,
+                    PageSize = pageSize
+                });
+            }
         }
 
         public Task<IEnumerable<Voucher>> GetByTypeAsync(VoucherType voucherType)
         {
             throw new System.NotImplementedException();
+        }
+
+        public async Task<Voucher?> GetWithDetailsAsync(int voucherId)
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                var sql = @"
+                    SELECT v.VoucherId, v.VoucherDate, v.VoucherType, v.ReferenceNo, v.Narration, v.CreatedByUserId,
+                           d.VoucherDetailId, d.AccountId, d.DebitAmount, d.CreditAmount,
+                           a.AccountCode, a.AccountName
+                    FROM Vouchers v
+                    LEFT JOIN VoucherDetails d ON v.VoucherId = d.VoucherId
+                    LEFT JOIN ChartOfAccounts a ON d.AccountId = a.AccountId
+                    WHERE v.VoucherId = @VoucherId
+                    ORDER BY d.VoucherDetailId
+                ";
+                Voucher? voucher = null;
+                var lookup = new Dictionary<int, Voucher>();
+                var result = await connection.QueryAsync<Voucher, VoucherDetail, Account, Voucher>(
+                    sql,
+                    (v, d, a) =>
+                    {
+                        if (!lookup.TryGetValue(v.VoucherId, out voucher))
+                        {
+                            voucher = v;
+                            voucher.Details = new List<VoucherDetail>();
+                            lookup.Add(v.VoucherId, voucher);
+                        }
+                        if (d != null)
+                        {
+                            d.Account = a;
+                            voucher.Details.Add(d);
+                        }
+                        return voucher;
+                    },
+                    new { VoucherId = voucherId },
+                    splitOn: "VoucherDetailId,AccountCode"
+                );
+                return lookup.Values.FirstOrDefault();
+            }
         }
     }
 }

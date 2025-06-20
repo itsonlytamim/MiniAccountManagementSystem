@@ -13,5 +13,6 @@ namespace Core.Interfaces
         Task<Voucher?> GetByIdAsync(int voucherId);
         Task<IEnumerable<Voucher>> GetAllAsync(int pageNumber, int pageSize);
         Task<IEnumerable<Voucher>> GetByTypeAsync(VoucherType voucherType);
+        Task<Voucher?> GetWithDetailsAsync(int voucherId);
     }
 }
