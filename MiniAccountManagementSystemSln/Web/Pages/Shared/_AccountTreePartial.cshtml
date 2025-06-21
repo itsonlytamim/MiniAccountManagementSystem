@@ -1,4 +1,4 @@
-﻿@model Core.Entities.Account
+﻿@model Application.DTOs.ChartOfAccountDto
 
 <li class="list-group-item" style="padding-left: calc(1.25rem + @(Model.Level * 25)px);">
     <div class="d-flex justify-content-between align-items-center">
@@ -18,7 +18,7 @@
     </div>
 </li>
 
-@if (Model.Children != null && Model.Children.Count > 0)
+@if (Model.Children != null && Model.Children.Any())
 {
     foreach (var child in Model.Children)
     {
