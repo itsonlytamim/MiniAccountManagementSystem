@@ -20,7 +20,9 @@
         </div>
         <div class="col-md-3">
             <label asp-for="Voucher.VoucherType" class="form-label"></label>
-            <select asp-for="Voucher.VoucherType" asp-items="Html.GetEnumSelectList<Core.Entities.VoucherType>()" class="form-select"></select>
+            <select asp-for="Voucher.VoucherType" asp-items="Html.GetEnumSelectList<Core.Entities.VoucherType>()" class="form-select">
+                <option value="">-- Select Type --</option>
+            </select>
             <span asp-validation-for="Voucher.VoucherType" class="text-danger"></span>
         </div>
         <div class="col-md-6">
@@ -88,7 +90,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Pass the account options to the JS file
+        // Pass the account options to the JS file in a cleaner way
         const accountOptions = `@Html.Raw(string.Join("", Model.AccountSL.Select(s => $"<option value=\\'{s.Value}\\'>{s.Text.Replace("'", "\\'")}</option>")))`;
     </script>
     <script src="~/js/voucher-entry.js" asp-append-version="true"></script>

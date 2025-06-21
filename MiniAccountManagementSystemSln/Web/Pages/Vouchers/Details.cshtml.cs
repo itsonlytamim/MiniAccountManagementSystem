@@ -1,5 +1,5 @@
-using Core.Entities;
-using Core.Interfaces;
+using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,16 +10,29 @@ namespace Web.Pages.Vouchers
     [Authorize]
     public class DetailsModel : PageModel
     {
-        private readonly IVoucherRepository _voucherRepo;
-        public DetailsModel(IVoucherRepository voucherRepo)
+        private readonly IVoucherService _voucherService;
+
+        public DetailsModel(IVoucherService voucherService)
         {
-            _voucherRepo = voucherRepo;
+            _voucherService = voucherService;
         }
-        public Voucher Voucher { get; set; }
-        public async Task<IActionResult> OnGetAsync(int id)
+
+        public VoucherDetailViewDto Voucher { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int? id)
         {
-            Voucher = await _voucherRepo.GetWithDetailsAsync(id);
-            if (Voucher == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            Voucher = await _voucherService.GetVoucherDetailsAsync(id.Value);
+
+            if (Voucher == null)
+            {
+                return NotFound();
+            }
+
             return Page();
         }
     }

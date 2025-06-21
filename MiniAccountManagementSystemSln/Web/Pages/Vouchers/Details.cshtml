@@ -29,12 +29,12 @@
 </div>
 <h4>Voucher Lines</h4>
 <table class="table table-bordered table-striped">
-    <thead>
+    <thead class="table-light">
         <tr>
             <th>Account Code</th>
             <th>Account Name</th>
-            <th>Debit</th>
-            <th>Credit</th>
+            <th class="text-end">Debit</th>
+            <th class="text-end">Credit</th>
         </tr>
     </thead>
     <tbody>
@@ -43,10 +43,10 @@
         foreach (var d in Model.Voucher.Details)
         {
             <tr>
-                <td>@d.Account?.AccountCode</td>
-                <td>@d.Account?.AccountName</td>
-                <td>@d.DebitAmount</td>
-                <td>@d.CreditAmount</td>
+                <td>@d.AccountCode</td>
+                <td>@d.AccountName</td>
+                <td class="text-end">@d.DebitAmount.ToString("N2")</td>
+                <td class="text-end">@d.CreditAmount.ToString("N2")</td>
             </tr>
         }
     }
@@ -55,4 +55,11 @@
         <tr><td colspan="4" class="text-center">No details found.</td></tr>
     }
     </tbody>
+    <tfoot class="table-light fw-bold">
+        <tr>
+            <td colspan="2" class="text-end">Total</td>
+            <td class="text-end">@Model.Voucher.TotalDebit.ToString("N2")</td>
+            <td class="text-end">@Model.Voucher.TotalCredit.ToString("N2")</td>
+        </tr>
+    </tfoot>
 </table> 

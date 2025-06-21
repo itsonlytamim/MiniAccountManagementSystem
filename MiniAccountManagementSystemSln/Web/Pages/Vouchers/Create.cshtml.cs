@@ -1,10 +1,11 @@
-using Core.Entities;
-using Core.Interfaces;
+using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,53 +15,36 @@ namespace Web.Pages.Vouchers
     [Authorize(Roles = "Admin,Accountant")]
     public class CreateModel : PageModel
     {
-        private readonly IVoucherRepository _voucherRepo;
-        private readonly IAccountRepository _accountRepo;
+        private readonly IVoucherService _voucherService;
+        private readonly IAccountService _accountService; // For populating accounts dropdown
 
-        public CreateModel(IVoucherRepository voucherRepo, IAccountRepository accountRepo)
+        public CreateModel(IVoucherService voucherService, IAccountService accountService)
         {
-            _voucherRepo = voucherRepo;
-            _accountRepo = accountRepo;
+            _voucherService = voucherService;
+            _accountService = accountService;
         }
 
         [BindProperty]
-        public Voucher Voucher { get; set; } = new();
+        public VoucherCreateDto Voucher { get; set; } = new VoucherCreateDto();
 
         public SelectList AccountSL { get; set; }
 
-        private async Task PopulateAccountsDropDownList()
+        public async Task OnGetAsync()
         {
-            var allAccounts = await _accountRepo.GetAllHierarchicalAsync();
-            var flatList = new List<Account>();
-            void Flatten(IEnumerable<Account> accounts, int level = 0)
-            {
-                foreach (var acc in accounts)
-                {
-                    acc.AccountName = new string(' ', level * 4) + acc.AccountName;
-                    flatList.Add(acc);
-                    if (acc.Children.Any()) Flatten(acc.Children, level + 1);
-                }
-            }
-            Flatten(allAccounts);
-            AccountSL = new SelectList(flatList, "AccountId", "AccountName");
-        }
-
-        public async Task<IActionResult> OnGetAsync()
-        {
-            Voucher.VoucherDate = System.DateTime.Today;
-            Voucher.Details.Add(new VoucherDetail());
-            Voucher.Details.Add(new VoucherDetail());
             await PopulateAccountsDropDownList();
-            return Page();
+            // Initialize with one empty row for data entry
+            Voucher.Details.Add(new VoucherDetailCreateDto());
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Clean up empty rows submitted by the form
             Voucher.Details.RemoveAll(d => d.AccountId == 0 && d.DebitAmount == 0 && d.CreditAmount == 0);
 
+            // Basic business rule validation
             if (!Voucher.Details.Any())
             {
-                ModelState.AddModelError("Voucher.Details", "At least one voucher line is required.");
+                ModelState.AddModelError(string.Empty, "Voucher must have at least one detail line.");
             }
             else
             {
@@ -69,19 +53,49 @@ namespace Web.Pages.Vouchers
 
                 if (totalDebit != totalCredit)
                 {
-                    ModelState.AddModelError("Voucher.Details", "Total debits must equal total credits.");
+                    ModelState.AddModelError(string.Empty, "Total debit and credit amounts must be equal.");
+                }
+
+                if (totalDebit == 0)
+                {
+                    ModelState.AddModelError(string.Empty, "Voucher total cannot be zero.");
                 }
             }
-
+            
             if (!ModelState.IsValid)
             {
                 await PopulateAccountsDropDownList();
                 return Page();
             }
 
-            Voucher.CreatedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            await _voucherRepo.CreateAsync(Voucher);
-            return RedirectToPage("/Index");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var newVoucherId = await _voucherService.CreateVoucherAsync(Voucher, userId);
+
+            return RedirectToPage("./Details", new { id = newVoucherId });
+        }
+        
+        private async Task PopulateAccountsDropDownList()
+        {
+            var accounts = await _accountService.GetChartOfAccountsAsync();
+            var flattenedAccounts = new List<SelectListItem>();
+            AddAccountsToList(accounts, flattenedAccounts, 0);
+            AccountSL = new SelectList(flattenedAccounts, "Value", "Text");
+        }
+
+        private void AddAccountsToList(IEnumerable<ChartOfAccountDto> accounts, List<SelectListItem> list, int level)
+        {
+            foreach (var account in accounts)
+            {
+                list.Add(new SelectListItem
+                {
+                    Text = new string(' ', level * 4) + account.AccountName, // Non-breaking space for indentation
+                    Value = account.AccountId.ToString()
+                });
+                if (account.Children.Any())
+                {
+                    AddAccountsToList(account.Children, list, level + 1);
+                }
+            }
         }
     }
 }
