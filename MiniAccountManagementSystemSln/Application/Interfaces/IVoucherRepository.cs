@@ -12,6 +12,7 @@ namespace Application.Interfaces
         Task<int> CreateAsync(Voucher voucher);
         Task<Voucher?> GetByIdAsync(int voucherId);
         Task<IEnumerable<Voucher>> GetAllAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<Voucher>> GetAllForExportAsync();
         Task<IEnumerable<Voucher>> GetByTypeAsync(VoucherType voucherType);
         Task<Voucher?> GetWithDetailsAsync(int voucherId);
     }

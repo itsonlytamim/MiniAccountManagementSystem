@@ -6,6 +6,7 @@ namespace Application.Interfaces
     {
         Task<int> CreateVoucherAsync(VoucherCreateDto voucherDto, string userId);
         Task<IEnumerable<VoucherListDto>> GetVouchersAsync(int pageNumber, int pageSize);
+        Task<IEnumerable<VoucherListDto>> GetAllVouchersForExportAsync();
         Task<VoucherDetailViewDto?> GetVoucherDetailsAsync(int voucherId);
     }
 } 
