@@ -1,10 +1,11 @@
 using Core.Entities;
-using Core.Interfaces;
+using Application.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Web.Data;
+using Application.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,15 +37,16 @@ builder.Services.AddScoped<DapperContext>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IVoucherRepository, VoucherRepository>();
 
-// Configure cookie settings
+// Registering application services
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>();
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
 });
-
-// Add authorization policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
