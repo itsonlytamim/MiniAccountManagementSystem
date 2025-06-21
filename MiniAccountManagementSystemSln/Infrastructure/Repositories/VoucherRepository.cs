@@ -68,6 +68,17 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Voucher>> GetAllForExportAsync()
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                var sql = @"SELECT VoucherId, VoucherDate, VoucherType, ReferenceNo, Narration, CreatedByUserId
+                            FROM Vouchers
+                            ORDER BY VoucherDate DESC, VoucherId DESC";
+                return await connection.QueryAsync<Voucher>(sql);
+            }
+        }
+
         public Task<IEnumerable<Voucher>> GetByTypeAsync(VoucherType voucherType)
         {
             throw new System.NotImplementedException();

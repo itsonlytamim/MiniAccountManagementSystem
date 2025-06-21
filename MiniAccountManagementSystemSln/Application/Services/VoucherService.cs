@@ -1,6 +1,7 @@
 using Application.DTOs;
 using Application.Interfaces;
 using Core.Entities;
+using System.Drawing;
 using System.Security.Claims;
 
 namespace Application.Services
@@ -47,6 +48,19 @@ namespace Application.Services
             });
         }
         
+        public async Task<IEnumerable<VoucherListDto>> GetAllVouchersForExportAsync()
+        {
+            var vouchers = await _voucherRepository.GetAllForExportAsync();
+            return vouchers.Select(v => new VoucherListDto
+            {
+                VoucherId = v.VoucherId,
+                VoucherDate = v.VoucherDate,
+                VoucherType = v.VoucherType.ToString(),
+                ReferenceNo = v.ReferenceNo,
+                Narration = v.Narration
+            });
+        }
+
         public async Task<VoucherDetailViewDto?> GetVoucherDetailsAsync(int voucherId)
         {
             var voucher = await _voucherRepository.GetWithDetailsAsync(voucherId);
