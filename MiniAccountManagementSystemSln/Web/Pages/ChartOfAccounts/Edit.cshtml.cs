@@ -1,5 +1,5 @@
-using Core.Entities;
-using Core.Interfaces;
+using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -13,43 +13,32 @@ namespace Web.Pages.ChartOfAccounts
     [Authorize(Roles = "Admin,Accountant")]
     public class EditModel : PageModel
     {
-        private readonly IAccountRepository _accountRepo;
+        private readonly IAccountService _accountService;
 
-        public EditModel(IAccountRepository accountRepo)
+        public EditModel(IAccountService accountService)
         {
-            _accountRepo = accountRepo;
+            _accountService = accountService;
         }
 
         [BindProperty]
-        public Account Account { get; set; }
-
+        public AccountDto Account { get; set; }
         public SelectList ParentAccountSL { get; set; }
 
-        private async Task PopulateParentAccountsDropDownList(int? excludeId = null)
+        public async Task<IActionResult> OnGetAsync(int? id)
         {
-            var allAccounts = await _accountRepo.GetAllHierarchicalAsync();
-            var flatList = new List<Account>();
-
-            void Flatten(IEnumerable<Account> accounts, int level = 0)
+            if (id == null)
             {
-                foreach (var acc in accounts)
-                {
-                    if (excludeId.HasValue && acc.AccountId == excludeId.Value) continue;
-                    acc.AccountName = new string(' ', level * 4) + acc.AccountName;
-                    flatList.Add(acc);
-                    if (acc.Children.Any()) Flatten(acc.Children, level + 1);
-                }
+                return NotFound();
             }
-            Flatten(allAccounts);
 
-            ParentAccountSL = new SelectList(flatList, "AccountId", "AccountName");
-        }
+            var account = await _accountService.GetAccountByIdAsync(id.Value);
+            if (account == null)
+            {
+                return NotFound();
+            }
+            Account = account;
 
-        public async Task<IActionResult> OnGetAsync(int id)
-        {
-            Account = await _accountRepo.GetByIdAsync(id);
-            if (Account == null) return NotFound();
-            await PopulateParentAccountsDropDownList(id);
+            await PopulateParentAccountsDropDownList(Account.AccountId);
             return Page();
         }
 
@@ -60,8 +49,54 @@ namespace Web.Pages.ChartOfAccounts
                 await PopulateParentAccountsDropDownList(Account.AccountId);
                 return Page();
             }
-            await _accountRepo.UpdateAsync(Account);
+            
+            if (Account.ParentAccountId == 0)
+            {
+                Account.ParentAccountId = null;
+            }
+            
+            // Basic circular dependency check
+            if (Account.ParentAccountId == Account.AccountId)
+            {
+                ModelState.AddModelError("Account.ParentAccountId", "An account cannot be its own parent.");
+                await PopulateParentAccountsDropDownList(Account.AccountId);
+                return Page();
+            }
+
+            await _accountService.UpdateAccountAsync(Account);
+
             return RedirectToPage("./Index");
+        }
+
+        private async Task PopulateParentAccountsDropDownList(int currentAccountId)
+        {
+            var accounts = await _accountService.GetChartOfAccountsAsync();
+            var flattenedAccounts = new List<SelectListItem>();
+            flattenedAccounts.Add(new SelectListItem { Text = "None (Top-Level Account)", Value = "0" });
+            
+            AddAccountsToList(accounts, flattenedAccounts, 0, currentAccountId);
+
+            ParentAccountSL = new SelectList(flattenedAccounts, "Value", "Text", Account.ParentAccountId);
+        }
+
+        private void AddAccountsToList(IEnumerable<ChartOfAccountDto> accounts, List<SelectListItem> list, int level, int currentAccountId)
+        {
+            foreach (var account in accounts)
+            {
+                // Exclude the current account and its descendants from the list of potential parents
+                if (account.AccountId == currentAccountId) continue;
+
+                list.Add(new SelectListItem
+                {
+                    Text = new string(' ', level * 4) + account.AccountName,
+                    Value = account.AccountId.ToString()
+                });
+
+                if (account.Children.Any())
+                {
+                    AddAccountsToList(account.Children, list, level + 1, currentAccountId);
+                }
+            }
         }
     }
 } 

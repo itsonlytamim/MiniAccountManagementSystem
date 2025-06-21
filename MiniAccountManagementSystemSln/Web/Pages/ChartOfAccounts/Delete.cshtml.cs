@@ -1,9 +1,8 @@
-using Core.Entities;
-using Core.Interfaces;
+using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Web.Pages.ChartOfAccounts
@@ -11,37 +10,60 @@ namespace Web.Pages.ChartOfAccounts
     [Authorize(Roles = "Admin")]
     public class DeleteModel : PageModel
     {
-        private readonly IAccountRepository _accountRepo;
+        private readonly IAccountService _accountService;
 
-        public DeleteModel(IAccountRepository accountRepo)
+        public DeleteModel(IAccountService accountService)
         {
-            _accountRepo = accountRepo;
+            _accountService = accountService;
         }
 
         [BindProperty]
-        public Account Account { get; set; }
-        public bool HasChildren { get; set; }
+        public AccountDto Account { get; set; }
         public string ErrorMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int id)
+        public async Task<IActionResult> OnGetAsync(int? id)
         {
-            Account = await _accountRepo.GetByIdAsync(id);
-            if (Account == null) return NotFound();
-            HasChildren = await _accountRepo.HasChildrenAsync(id);
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var account = await _accountService.GetAccountByIdAsync(id.Value);
+
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            Account = account;
+
+            if (!await _accountService.CanDeleteAccountAsync(id.Value))
+            {
+                ErrorMessage = "This account cannot be deleted because it is a parent to other accounts. Please delete or re-assign child accounts first.";
+            }
+
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(int id)
+        public async Task<IActionResult> OnPostAsync(int? id)
         {
-            Account = await _accountRepo.GetByIdAsync(id);
-            if (Account == null) return NotFound();
-            HasChildren = await _accountRepo.HasChildrenAsync(id);
-            if (HasChildren)
+            if (id == null)
             {
-                ErrorMessage = "Cannot delete an account that has child accounts.";
+                return NotFound();
+            }
+
+            if (!await _accountService.CanDeleteAccountAsync(id.Value))
+            {
+                // Re-fetch data for display
+                var account = await _accountService.GetAccountByIdAsync(id.Value);
+                if (account == null) return NotFound();
+                Account = account;
+                ErrorMessage = "This account cannot be deleted because it is a parent to other accounts. Please delete or re-assign child accounts first.";
                 return Page();
             }
-            await _accountRepo.DeleteAsync(id);
+            
+            await _accountService.DeleteAccountAsync(id.Value);
+
             return RedirectToPage("./Index");
         }
     }

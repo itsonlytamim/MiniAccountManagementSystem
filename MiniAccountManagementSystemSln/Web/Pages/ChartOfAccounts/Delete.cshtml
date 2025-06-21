@@ -8,35 +8,36 @@
 <h1>Delete Account</h1>
 <hr />
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8">
+        <h3>Are you sure you want to delete this account?</h3>
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
+            <div class="alert alert-danger" role="alert">
+                @Model.ErrorMessage
+            </div>
         }
-        <form method="post">
-            <input type="hidden" asp-for="Account.AccountId" />
-            <div class="mb-3">
-                <label class="form-label">Account Code</label>
-                <input class="form-control" value="@Model.Account.AccountCode" readonly />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Account Name</label>
-                <input class="form-control" value="@Model.Account.AccountName" readonly />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Parent Account ID</label>
-                <input class="form-control" value="@Model.Account.ParentAccountId" readonly />
-            </div>
-            @if (Model.HasChildren)
-            {
-                <div class="alert alert-warning">This account has child accounts and cannot be deleted.</div>
-                <a asp-page="Index" class="btn btn-secondary">Back to List</a>
-            }
-            else
-            {
-                <button type="submit" class="btn btn-danger">Delete</button>
-                <a asp-page="Index" class="btn btn-secondary">Cancel</a>
-            }
-        </form>
+        <div>
+            <h4>@Model.Account.AccountCode - @Model.Account.AccountName</h4>
+            <hr />
+            <dl class="row">
+                <dt class="col-sm-3">Account Code</dt>
+                <dd class="col-sm-9">@Model.Account.AccountCode</dd>
+
+                <dt class="col-sm-3">Account Name</dt>
+                <dd class="col-sm-9">@Model.Account.AccountName</dd>
+
+                <dt class="col-sm-3">Parent Account ID</dt>
+                <dd class="col-sm-9">@(Model.Account.ParentAccountId?.ToString() ?? "N/A")</dd>
+            </dl>
+    
+            <form method="post">
+                <input type="hidden" asp-for="Account.AccountId" />
+                @if (string.IsNullOrEmpty(Model.ErrorMessage))
+                {
+                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                }
+                <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+            </form>
+        </div>
     </div>
 </div> 

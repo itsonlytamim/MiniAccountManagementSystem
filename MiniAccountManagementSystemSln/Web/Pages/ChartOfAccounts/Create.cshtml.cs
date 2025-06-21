@@ -1,8 +1,7 @@
-using Core.Entities;
-using Core.Interfaces;
+using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
@@ -14,41 +13,21 @@ namespace Web.Pages.ChartOfAccounts
     [Authorize(Roles = "Admin,Accountant")]
     public class CreateModel : PageModel
     {
-        private readonly IAccountRepository _accountRepo;
+        private readonly IAccountService _accountService;
 
-        public CreateModel(IAccountRepository accountRepo)
+        public CreateModel(IAccountService accountService)
         {
-            _accountRepo = accountRepo;
+            _accountService = accountService;
         }
 
         [BindProperty]
-        public Account Account { get; set; }
-
+        public AccountDto Account { get; set; } = new AccountDto();
+        
         public SelectList ParentAccountSL { get; set; }
 
-        private async Task PopulateParentAccountsDropDownList()
-        {
-            var allAccounts = await _accountRepo.GetAllHierarchicalAsync();
-            var flatList = new List<Account>();
-
-            void Flatten(IEnumerable<Account> accounts, int level = 0)
-            {
-                foreach (var acc in accounts)
-                {
-                    acc.AccountName = new string(' ', level * 4) + acc.AccountName;
-                    flatList.Add(acc);
-                    if (acc.Children.Any()) Flatten(acc.Children, level + 1);
-                }
-            }
-            Flatten(allAccounts);
-
-            ParentAccountSL = new SelectList(flatList, "AccountId", "AccountName");
-        }
-
-        public async Task<IActionResult> OnGetAsync()
+        public async Task OnGetAsync()
         {
             await PopulateParentAccountsDropDownList();
-            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -59,8 +38,42 @@ namespace Web.Pages.ChartOfAccounts
                 return Page();
             }
 
-            await _accountRepo.CreateAsync(Account);
+            if (Account.ParentAccountId == 0)
+            {
+                Account.ParentAccountId = null;
+            }
+
+            await _accountService.CreateAccountAsync(Account);
+
             return RedirectToPage("./Index");
+        }
+
+        private async Task PopulateParentAccountsDropDownList()
+        {
+            var accounts = await _accountService.GetChartOfAccountsAsync();
+            var flattenedAccounts = new List<SelectListItem>();
+            
+            flattenedAccounts.Add(new SelectListItem { Text = "None (Top-Level Account)", Value = "0" });
+            
+            AddAccountsToList(accounts, flattenedAccounts, 0);
+
+            ParentAccountSL = new SelectList(flattenedAccounts, "Value", "Text", Account.ParentAccountId);
+        }
+        
+        private void AddAccountsToList(IEnumerable<ChartOfAccountDto> accounts, List<SelectListItem> list, int level)
+        {
+            foreach (var account in accounts)
+            {
+                list.Add(new SelectListItem
+                {
+                    Text = new string(' ', level * 4) + account.AccountName, // Non-breaking space for indentation
+                    Value = account.AccountId.ToString()
+                });
+                if (account.Children.Any())
+                {
+                    AddAccountsToList(account.Children, list, level + 1);
+                }
+            }
         }
     }
 }

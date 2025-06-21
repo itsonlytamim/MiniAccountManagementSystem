@@ -1,7 +1,6 @@
-using Core.Entities;
-using Core.Interfaces;
+using Application.DTOs;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Web.Pages.ChartOfAccounts
@@ -9,18 +8,18 @@ namespace Web.Pages.ChartOfAccounts
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly IAccountRepository _accountRepo;
+        private readonly IAccountService _accountService;
 
-        public IndexModel(IAccountRepository accountRepo)
+        public IndexModel(IAccountService accountService)
         {
-            _accountRepo = accountRepo;
+            _accountService = accountService;
         }
 
-        public IList<Account> AccountTree { get; set; } = new List<Account>();
+        public List<ChartOfAccountDto> Accounts { get; set; } = new List<ChartOfAccountDto>();
 
         public async Task OnGetAsync()
         {
-            AccountTree = (List<Account>)await _accountRepo.GetAllHierarchicalAsync();
+            Accounts = (await _accountService.GetChartOfAccountsAsync()).ToList();
         }
     }
 }
