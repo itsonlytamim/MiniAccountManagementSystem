@@ -23,6 +23,7 @@ A simple web-based account management system built with ASP.NET Core (Razor Page
   - Export reports to Excel
 
 ---
+## For Screenshots Check each of the **Screenshots** folder category wise operation
 
 ## How to Use
 
