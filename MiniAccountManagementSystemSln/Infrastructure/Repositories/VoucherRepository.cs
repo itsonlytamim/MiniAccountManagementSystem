@@ -22,13 +22,11 @@ namespace Infrastructure.Repositories
 
         public async Task<int> CreateAsync(Voucher voucher)
         {
-            // Create a DataTable in memory that matches the SQL User-Defined Table Type
             var detailsTable = new DataTable();
             detailsTable.Columns.Add("AccountId", typeof(int));
             detailsTable.Columns.Add("DebitAmount", typeof(decimal));
             detailsTable.Columns.Add("CreditAmount", typeof(decimal));
 
-            // Populate the DataTable from the voucher's detail lines
             foreach (var detail in voucher.Details)
             {
                 detailsTable.Rows.Add(detail.AccountId, detail.DebitAmount, detail.CreditAmount);
@@ -49,9 +47,6 @@ namespace Infrastructure.Repositories
                 return await connection.ExecuteScalarAsync<int>("sp_SaveVoucher", parameters, commandType: CommandType.StoredProcedure);
             }
         }
-
-        // These methods are placeholders as per the interface.
-        // Implementing them would follow a similar pattern of creating stored procedures and calling them with Dapper.
         public Task<Voucher?> GetByIdAsync(int voucherId)
         {
             throw new System.NotImplementedException();
